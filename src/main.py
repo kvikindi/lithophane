@@ -23,27 +23,39 @@ def find_heights(pix):
 
 def lower_resolution(x, y, pix):
     layer_height = float(sys.argv[4])
-    max_x = int(sys.argv[5]) #the physical size
+    max_x = int(sys.argv[5]) # the physical size in mm
     max_y = int(sys.argv[6]) 
 
-    x_resolution = (max_x / layer_height) #the number of pixels that can physically fit
-    y_resolution = (max_y / layer_height)
+    x_resolution = int((max_x / layer_height)) # the number of pixels that can physically fit given the layer thickness
+    y_resolution = int(max_y / layer_height)
 
     adjustment_x = math.ceil(x - x_resolution) # the number of x that I need to remove
-    adjustment_y = math.ceil(y - y_resolution)
+    adjustment_y = math.ceil(y - y_resolution) # the number of y that I need to remove
+
+    intervals_x = 1 #initializing intervals as 1
+    intervals_y = 1
 
     if (adjustment_x) > 0:
-        
-        print(x, x_resolution)
-        intervals = math.floor(x / adjustment_x)
-        
-        blank = Image.new("RGB", (adjustment_x, adjustment_y), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
+        # print(x, x_resolution)
+        intervals_x = math.floor(x / adjustment_x) #defining how often to SKIP a pixel
 
-        for i in range(x):
-            pass #this will be the part that systematically creates a new image based on the ones that need to be removed
     
     if (adjustment_y) > 0:
-        print(y, y_resolution)
+        # print(y, y_resolution)
+        intervals_y = math.floor(y / adjustment_y)
+    
+    img = Image.new("RGB", (x_resolution, y_resolution), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
+
+    adj_pix = img.load()
+    # print(adj_pix[1, 1])
+    
+    for i in range(y_resolution):
+        for j in range(x_resolution):
+            if (i % intervals_y != 0) or (j % intervals_x != 0):
+                pixel = pix[j, i]
+                adj_pix[j, i] = pixel
+    
+    return img
 
 def test_fit(x, y):
     layer_height = float(sys.argv[4])
@@ -64,12 +76,10 @@ def test_fit(x, y):
     else:
         return True
 
-
 def create_stl(pix, x, y):
     if test_fit(x, y) == False:
-        lower_resolution(x, y, pix)
-
-
+        pix = lower_resolution(x, y, pix)
+        save_image(pix)
 
 def main():
     # instantiating the image
@@ -85,7 +95,6 @@ def main():
     save_image(img)
     
     create_stl(pix, x, y)
-
 
 if __name__ == "__main__":
     main()
