@@ -32,14 +32,13 @@ def lower_resolution(x, y, pix):
     adjustment_x = math.ceil(x - x_resolution) # the number of x that I need to remove
     adjustment_y = math.ceil(y - y_resolution) # the number of y that I need to remove
 
-    intervals_x = 1 #initializing intervals as 1
-    intervals_y = 1
+    intervals_x = x #initializing intervals as 1
+    intervals_y = y
 
     if (adjustment_x) > 0:
         # print(x, x_resolution)
         intervals_x = math.floor(x / adjustment_x) #defining how often to SKIP a pixel
 
-    
     if (adjustment_y) > 0:
         # print(y, y_resolution)
         intervals_y = math.floor(y / adjustment_y)
@@ -49,12 +48,22 @@ def lower_resolution(x, y, pix):
     adj_pix = img.load()
     # print(adj_pix[1, 1])
     
+    x_offset, y_offset = 0, 0
+
     for i in range(y_resolution):
+        x_offset = 0
+        if (i % intervals_y == 0):
+                y_offset += 1
         for j in range(x_resolution):
-            if (i % intervals_y != 0) or (j % intervals_x != 0):
-                pixel = pix[j, i]
-                adj_pix[j, i] = pixel
-    
+            # print(j + x_offset, i + y_offset)
+
+            pixel = pix[j + x_offset, i + y_offset]
+            adj_pix[j, i] = pixel
+
+            if (j % intervals_x == 0):
+                pass
+                x_offset += 1
+
     return img
 
 def test_fit(x, y):
@@ -68,7 +77,7 @@ def test_fit(x, y):
             return False
         else:
             raise Exception("Picture cannot fit into the maximum x length provided. Please increase the x or reduce the resolution of the image.")
-    if (max_y / layer_height) > y:
+    if (max_y / layer_height) < y:
         if input("Picture cannot fit within the space determined. Would you like to automatically adjust the resolution? (y/n)") == "y":
             return False
         else:
@@ -78,8 +87,8 @@ def test_fit(x, y):
 
 def create_stl(pix, x, y):
     if test_fit(x, y) == False:
-        pix = lower_resolution(x, y, pix)
-        save_image(pix)
+        img = lower_resolution(x, y, pix)
+        save_image(img)
 
 def main():
     # instantiating the image
