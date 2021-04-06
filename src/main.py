@@ -1,6 +1,9 @@
 from PIL import Image
 import sys
 import math
+import numpy as np
+from stl import mesh
+import time
 
 def mean(pixel):
     sum__ = pixel[0] + pixel[1] + pixel[2]
@@ -31,6 +34,7 @@ def find_heights(pix, x, y):
             pixel = pix[j, i]
             heightmap[j][i] = math.ceil(pixel[0] / light_increments) # since every item in the tuple is the same, this index doesn't matter
 
+    return heightmap
 
 def lower_resolution(x, y, pix):
     layer_height = float(sys.argv[4])
@@ -90,8 +94,53 @@ def test_fit(x, y):
 def create_stl(pix, x, y):
     if test_fit(x, y) == False:
         pass
-    
+
+def save_data(data, filename):
+    file_ = open(filename, "w")
+    for i in range(len(data)):
+        file_.write(str(data[i]) + "\n")
+    file_.close()
+
+def find_left(array, x, y):
+    try:
+        point = array[y][x-1]
+        return point
+    except IndexError as error:
+        print(error)
+        return -1
+
+def find_right(array, x, y):
+    try:
+        point = array[y][x+1]
+        return point
+    except IndexError as error:
+        print(error)
+        return -1
+
+def find_up(array, x, y):
+    try:
+        point = array[y-1][x]
+        return point
+    except IndexError as error:
+        print(error)
+        return -1
+
+def find_down(array, x, y):
+    try:
+        point = array[y+1][x]
+        return point
+    except IndexError as error:
+        print(error)
+        return -1
+
+def find_surfaces(heightmap):
+    pass
+    # surfaces = np.zeros(len(heightmap[0]) * len(heightmap), dtype=mesh.Mesh.dtype) # the first parameter is the number of vectors, but this cannot be done until all triangles are calculated
+
 def main():
+    # starting a timer
+    start = time.time()
+
     # instantiating the image
     img = Image.open(sys.argv[1])
 
@@ -111,9 +160,15 @@ def main():
     pix = convert_to_grayscale(pix, x, y)
     
     # calculate "heightmap" (or whatever this data structure is) based on grayscale intensities
-    find_heights(pix, x, y)
+    heightmap = find_heights(pix, x, y)
+
+    #find surfaces
+    find_surfaces(heightmap)
     #create a mesh
     create_stl(pix, x, y)
+
+
+    ellapsed = time.time() - start
 
 if __name__ == "__main__":
     main()
