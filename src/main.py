@@ -17,9 +17,20 @@ def convert_to_grayscale(pix, x, y):
 def save_image(img):
     img.save(sys.argv[2]) #saves image
 
-def find_heights(pix):
-    thickness = sys.argv[3]
-    layerheight = sys.argv[4]
+def find_heights(pix, x, y):
+    thickness = float(sys.argv[3])
+    layerheight = float(sys.argv[4])
+
+    light_resolution = (thickness / layerheight)
+    light_increments = math.floor(255 / light_resolution)
+    
+    heightmap = [[0 for i in range(y + 1)] for j in range(x + 1)] # this creates an empty 2D array of size x by y
+
+    for i in range(y):
+        for j in range(x):
+            pixel = pix[j, i]
+            heightmap[j][i] = math.ceil(pixel[0] / light_increments) # since every item in the tuple is the same, this index doesn't matter
+
 
 def lower_resolution(x, y, pix):
     layer_height = float(sys.argv[4])
@@ -100,7 +111,7 @@ def main():
     pix = convert_to_grayscale(pix, x, y)
     
     # calculate "heightmap" (or whatever this data structure is) based on grayscale intensities
-
+    find_heights(pix, x, y)
     #create a mesh
     create_stl(pix, x, y)
 
