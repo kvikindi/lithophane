@@ -101,41 +101,36 @@ def save_data(data, filename):
         file_.write(str(data[i]) + "\n")
     file_.close()
 
-def find_left(array, x, y):
+def find_horizontal(array, x, y, increment):
     try:
-        point = array[y][x-1]
-        return point
+        point = array[y][x+increment]
+        return True
     except IndexError as error:
         print(error)
-        return -1
+        return False
 
-def find_right(array, x, y):
+def find_vertical(array, x, y, increment):
     try:
-        point = array[y][x+1]
-        return point
+        point = array[y+increment][x]
+        return True
     except IndexError as error:
         print(error)
-        return -1
-
-def find_up(array, x, y):
-    try:
-        point = array[y-1][x]
-        return point
-    except IndexError as error:
-        print(error)
-        return -1
-
-def find_down(array, x, y):
-    try:
-        point = array[y+1][x]
-        return point
-    except IndexError as error:
-        print(error)
-        return -1
+        return False
 
 def find_surfaces(heightmap):
-    pass
-    # surfaces = np.zeros(len(heightmap[0]) * len(heightmap), dtype=mesh.Mesh.dtype) # the first parameter is the number of vectors, but this cannot be done until all triangles are calculated
+    number_of_vertices = ((len(heightmap[0]) - 1) * (len(heightmap) - 1)) * 2 # the number of vertices is 2(x-1 * y-1)
+    surfaces = np.zeros(number_of_vertices, dtype=mesh.Mesh.dtype)
+
+    vert_index = 0
+    for y in range(len(heightmap)):
+        if y != len(heightmap) - 1: #do not need to complete in the last row
+            for x in range(len(heightmap[y])):
+                if x != len(heightmap[y]) - 1: # do not need last column
+                    surfaces["vectors"][vert_index] = np.array([[x, y, heightmap[y][x]], [x, y+1, heightmap[y+1][x]], [x+1, y, heightmap[y][x+1]]]) #creates "first" triangle
+                    vert_index += 1
+                    surfaces["vectors"][vert_index] = np.array(([[x, y+1, heightmap[y+1][x]], [x+1, y+1, heightmap[y+1][x+1]], [x+1, y, heightmap[y][x+1]]]))
+
+    return surfaces
 
 def main():
     # starting a timer
@@ -163,10 +158,10 @@ def main():
     heightmap = find_heights(pix, x, y)
 
     #find surfaces
-    find_surfaces(heightmap)
+    surfaces = find_surfaces(heightmap)
+    
     #create a mesh
     create_stl(pix, x, y)
-
 
     ellapsed = time.time() - start
 
