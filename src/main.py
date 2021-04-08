@@ -18,7 +18,7 @@ def convert_to_grayscale(pix, x, y):
     return pix
 
 def save_image(img):
-    img.save(sys.argv[2]) #saves image
+    img.save("Pics/" + sys.argv[2] + ".png") #saves image
 
 def find_heights(pix, x, y):
     thickness = float(sys.argv[3])
@@ -69,7 +69,7 @@ def lower_resolution(x, y, pix):
             if (j % intervals_x == 0):
                 pass
                 x_offset += 1
-
+    save_image(img)
     return img
 
 def test_fit(x, y):
@@ -91,7 +91,6 @@ def test_fit(x, y):
     else:
         return True
 
-def create_stl(pix, x, y):
     if test_fit(x, y) == False:
         pass
 
@@ -132,12 +131,17 @@ def find_surfaces(heightmap):
 
     return surfaces
 
+def create_mesh(surfaces):
+    stl_mesh = mesh.Mesh(surfaces, remove_empty_areas = False)
+    stl_mesh.normals
+    stl_mesh.save("STLS/" + sys.argv[2] + ".stl")
+
 def main():
     # starting a timer
     start = time.time()
 
     # instantiating the image
-    img = Image.open(sys.argv[1])
+    img = Image.open("Pics/" + sys.argv[1])
 
     # assigning important variables for image processing
     x = img.size[0]
@@ -161,9 +165,10 @@ def main():
     surfaces = find_surfaces(heightmap)
     
     #create a mesh
-    create_stl(pix, x, y)
+    create_mesh(surfaces)
 
     ellapsed = time.time() - start
+    print(ellapsed)
 
 if __name__ == "__main__":
     main()
