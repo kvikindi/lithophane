@@ -1,8 +1,9 @@
 ![](https://github.com/michaelpineirocode/lithophane/blob/main/images/blog_eye_flashes_1932x862.jpg)
 
 # lithophane
-### Unstable
 Free to use, open source lithophane maker built using python. The end goal is to be able to convert any image to a lithophane of a specified size.
+
+### Unstable release.
 
 ## How to use
 
