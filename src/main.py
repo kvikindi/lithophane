@@ -29,11 +29,12 @@ def find_heights(pix, x, y):
     
     heightmap = [[0 for i in range(y + 1)] for j in range(x + 1)] # this creates an empty 2D array of size x by y
 
+
     for i in range(y):
         for j in range(x):
             pixel = pix[j, i]
-            heightmap[j][i] = abs(math.ceil(light_increments - (pixel[0] / light_increments))) # since every item in the tuple is the same, this index doesn't matter
-            if heightmap[j][i] == 0:
+            heightmap[j][i] = abs(round(light_increments - ((255 - pixel[0]) / (light_increments * float(sys.argv[7]))))) # since every item in the tuple is the same, this index doesn't matter. Also argc[7] is normalizing value
+            if heightmap[j][i] == 0: #ensures that there will be a bottom
                 heightmap[j][i] = 1
     return heightmap
 
