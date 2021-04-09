@@ -32,8 +32,9 @@ def find_heights(pix, x, y):
     for i in range(y):
         for j in range(x):
             pixel = pix[j, i]
-            heightmap[j][i] = math.ceil(light_increments - (pixel[0] / light_increments)) # since every item in the tuple is the same, this index doesn't matter
-
+            heightmap[j][i] = abs(math.ceil(light_increments - (pixel[0] / light_increments))) # since every item in the tuple is the same, this index doesn't matter
+            if heightmap[j][i] == 0:
+                heightmap[j][i] = 1
     return heightmap
 
 def lower_resolution(x, y, pix):
@@ -98,13 +99,13 @@ def test_fit(x, y):
         pass
 
 def save_data(data, filename):
-    file_ = open(filename, "w")
+    file_ = open("Data/" + filename, "w")
     for i in range(len(data)):
         file_.write(str(data[i]) + "\n")
     file_.close()
 
 def find_surfaces(heightmap):
-    number_of_vertices = (((len(heightmap[0]) - 1) * (len(heightmap) - 1)) * 2) + (((len(heightmap[0]) - 1) * 4) + ((len(heightmap) - 1) * 4)) + 2 # the number of vertices is 2(x-1 * y-1) + 4(x-1 + y-1) + 2
+    number_of_vertices = (((len(heightmap[0]) - 1) * (len(heightmap) - 1)) * 2) + (((len(heightmap[0]) - 1) * 4) + ((len(heightmap) - 1) * 5)) + 2 # the number of vertices is 2(x-1 * y-1) + 4(x-1 + y-1) + 2
     surfaces = np.zeros(number_of_vertices, dtype=mesh.Mesh.dtype) # need to add 10 because of the sides and bottom
 
     vert_index = 0
@@ -116,17 +117,36 @@ def find_surfaces(heightmap):
                     vert_index += 1
                     surfaces["vectors"][vert_index] = np.array(([[x, y+1, heightmap[y+1][x]], [x+1, y+1, heightmap[y+1][x+1]], [x+1, y, heightmap[y][x+1]]]))
                     vert_index += 1
-        for y in range(len(heightmap)): # for creating the bottom section
-            surfaces["vectors"][vert_index] = np.array([[0, y, heightmap[y][0]], [0, y, 0], [0, y+1, heightmap[y][0]]])
+    
+    for y in range(len(heightmap)): # for creating the bottom section
+            # this is for creating the sides ALONG the y-axis
+            row_size = len(heightmap[y]) - 1
+            
+            surfaces["vectors"][vert_index] = np.array([[0, y, heightmap[y][0]], [0, y, 0], [0, y+1, heightmap[y][0]]]) # sides closest to 0 index
             vert_index += 1
             surfaces["vectors"][vert_index] = np.array([[0, y+1, heightmap[y][0]], [0, y, 0], [0, y+1, 0]])
             vert_index += 1
-            surfaces["vectors"][vert_index] = np.array([[len(heightmap[y]) - 1, y, heightmap[y][0]], [len(heightmap[y]) - 1, y, 0], [len(heightmap[y]) - 1, y+1, heightmap[y][0]]])
+            surfaces["vectors"][vert_index] = np.array([[row_size, y, heightmap[y][row_size]], [row_size, y, 0], [row_size, y+1, heightmap[y][0]]]) # sides furthest from 0 index
             vert_index += 1
-            surfaces["vectors"][vert_index] = np.array([[len(heightmap[y]) - 1, y+1, heightmap[y][0]], [len(heightmap[y]) - 1, y, 0], [len(heightmap[y]) - 1, y+1, 0]])
+            surfaces["vectors"][vert_index] = np.array([[row_size, y+1, heightmap[y][row_size]], [row_size, y, 0], [row_size, y+1, 0]])
             vert_index += 1
 
-        
+    for x in range(len(heightmap[0])): # this creates the sides ALONG the x-axis
+            column_size = len(heightmap) - 1
+
+            surfaces["vectors"][vert_index] = np.array([[x, 0, heightmap[0][x]], [x, 0, 0], [x+1, 0, heightmap[0][x]]]) # sides closest to 0 index
+            vert_index += 1
+            surfaces["vectors"][vert_index] = np.array([[x+1, 0, heightmap[0][x]], [x, 0, 0], [x+1, 0, 0]])
+            vert_index += 1
+            surfaces["vectors"][vert_index] = np.array([[x, column_size, heightmap[column_size][x]], [x, column_size, 0], [x+1, column_size, heightmap[0][x]]]) # sides furthest from 0 index
+            vert_index += 1
+            surfaces["vectors"][vert_index] = np.array([[x+1, column_size, heightmap[column_size][x]], [x, column_size, 0], [x+1, column_size, 0]])
+            vert_index += 1
+    
+    # add last two vertices on the bottom!
+    surfaces["vectors"][vert_index] = np.array([[0, 0, 0], [row_size, 0, 0], [0, column_size, 0]])
+    vert_index += 1
+    surfaces["vectors"][vert_index] = np.array([[row_size, column_size, 0], [row_size, 0, 0], [0, column_size, 0]])
 
     return surfaces
 
@@ -160,7 +180,7 @@ def main():
     
     # calculate "heightmap" (or whatever this data structure is) based on grayscale intensities
     heightmap = find_heights(pix, x, y)
-
+    save_data(heightmap, sys.argv[2])
     #find surfaces
     surfaces = find_surfaces(heightmap)
     
