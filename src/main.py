@@ -2,7 +2,7 @@ from PIL import Image
 import sys
 import math
 import numpy as np
-from stl import mesh
+from stl import mesh, stl
 import time
 
 def mean(pixel):
@@ -18,7 +18,7 @@ def convert_to_grayscale(pix, x, y):
     return pix
 
 def save_image(img):
-    img.save("Pics/" + sys.argv[2] + ".png") #saves image
+    img.save("Pics/Outputs/" + sys.argv[2] + ".png") #saves image
 
 def find_heights(pix, x, y):
     thickness = float(sys.argv[3])
@@ -32,7 +32,7 @@ def find_heights(pix, x, y):
     for i in range(y):
         for j in range(x):
             pixel = pix[j, i]
-            heightmap[j][i] = math.ceil(pixel[0] / light_increments) # since every item in the tuple is the same, this index doesn't matter
+            heightmap[j][i] = math.ceil(light_increments - (pixel[0] / light_increments)) # since every item in the tuple is the same, this index doesn't matter
 
     return heightmap
 
@@ -58,18 +58,21 @@ def lower_resolution(x, y, pix):
 
     x_offset, y_offset = 0, 0
 
-    for i in range(y_resolution):
-        x_offset = 0 #resets the offset every time that we change y's
-        if (i % intervals_y == 0): #skips a y ONCE for every time we loop through
-                y_offset += 1
-        for j in range(x_resolution):
-            pixel = pix[j + x_offset, i + y_offset]
-            adj_pix[j, i] = pixel
+    try:
+        for i in range(y_resolution):
+            x_offset = 0 #resets the offset every time that we change y's
+            if (i % intervals_y == 0): #skips a y ONCE for every time we loop through
+                    y_offset += 1
+            for j in range(x_resolution):
+                pixel = pix[j + x_offset, i + y_offset]
+                adj_pix[j, i] = pixel
 
-            if (j % intervals_x == 0):
-                pass
-                x_offset += 1
-    save_image(img)
+                if (j % intervals_x == 0):
+                    pass
+                    x_offset += 1
+    except IndexError:
+        print ("Photo dimensions too far disproportionate from max_x or max_y.")
+        
     return img
 
 def test_fit(x, y):
@@ -100,25 +103,9 @@ def save_data(data, filename):
         file_.write(str(data[i]) + "\n")
     file_.close()
 
-def find_horizontal(array, x, y, increment):
-    try:
-        point = array[y][x+increment]
-        return True
-    except IndexError as error:
-        print(error)
-        return False
-
-def find_vertical(array, x, y, increment):
-    try:
-        point = array[y+increment][x]
-        return True
-    except IndexError as error:
-        print(error)
-        return False
-
 def find_surfaces(heightmap):
-    number_of_vertices = ((len(heightmap[0]) - 1) * (len(heightmap) - 1)) * 2 # the number of vertices is 2(x-1 * y-1)
-    surfaces = np.zeros(number_of_vertices, dtype=mesh.Mesh.dtype)
+    number_of_vertices = (((len(heightmap[0]) - 1) * (len(heightmap) - 1)) * 2) + (((len(heightmap[0]) - 1) * 4) + ((len(heightmap) - 1) * 4)) + 2 # the number of vertices is 2(x-1 * y-1) + 4(x-1 + y-1) + 2
+    surfaces = np.zeros(number_of_vertices, dtype=mesh.Mesh.dtype) # need to add 10 because of the sides and bottom
 
     vert_index = 0
     for y in range(len(heightmap)):
@@ -128,20 +115,32 @@ def find_surfaces(heightmap):
                     surfaces["vectors"][vert_index] = np.array([[x, y, heightmap[y][x]], [x, y+1, heightmap[y+1][x]], [x+1, y, heightmap[y][x+1]]]) #creates "first" triangle
                     vert_index += 1
                     surfaces["vectors"][vert_index] = np.array(([[x, y+1, heightmap[y+1][x]], [x+1, y+1, heightmap[y+1][x+1]], [x+1, y, heightmap[y][x+1]]]))
+                    vert_index += 1
+        for y in range(len(heightmap)): # for creating the bottom section
+            surfaces["vectors"][vert_index] = np.array([[0, y, heightmap[y][0]], [0, y, 0], [0, y+1, heightmap[y][0]]])
+            vert_index += 1
+            surfaces["vectors"][vert_index] = np.array([[0, y+1, heightmap[y][0]], [0, y, 0], [0, y+1, 0]])
+            vert_index += 1
+            surfaces["vectors"][vert_index] = np.array([[len(heightmap[y]) - 1, y, heightmap[y][0]], [len(heightmap[y]) - 1, y, 0], [len(heightmap[y]) - 1, y+1, heightmap[y][0]]])
+            vert_index += 1
+            surfaces["vectors"][vert_index] = np.array([[len(heightmap[y]) - 1, y+1, heightmap[y][0]], [len(heightmap[y]) - 1, y, 0], [len(heightmap[y]) - 1, y+1, 0]])
+            vert_index += 1
+
+        
 
     return surfaces
 
 def create_mesh(surfaces):
     stl_mesh = mesh.Mesh(surfaces, remove_empty_areas = False)
     stl_mesh.normals
-    stl_mesh.save("STLS/" + sys.argv[2] + ".stl")
+    stl_mesh.save("STLS/" + sys.argv[2] + ".stl", mode=stl.Mode.ASCII)
 
 def main():
     # starting a timer
     start = time.time()
 
     # instantiating the image
-    img = Image.open("Pics/" + sys.argv[1])
+    img = Image.open("Pics/Inputs/" + sys.argv[1])
 
     # assigning important variables for image processing
     x = img.size[0]
@@ -157,6 +156,7 @@ def main():
 
     # convert to grayscale
     pix = convert_to_grayscale(pix, x, y)
+    save_image(img)
     
     # calculate "heightmap" (or whatever this data structure is) based on grayscale intensities
     heightmap = find_heights(pix, x, y)
