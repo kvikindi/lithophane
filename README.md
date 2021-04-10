@@ -3,8 +3,6 @@
 # lithophane
 Free to use, open source lithophane maker built using python. The end goal is to be able to convert any image to a lithophane of a specified size.
 
-### Unstable release.
-
 ## How to use
 
 As of now, the program must be run with a few command line arguments.  
