@@ -38,7 +38,7 @@ This code will clone numpy into the directory locally.
 ![](https://github.com/michaelpineirocode/lithophane/blob/main/images/Screen%20Shot%202021-04-10%20at%201.11.23%20PM.png)
 
 ### 2.) Within the src directory, execute the command following the arguments above.  
-Photo goes here.  
+![](https://github.com/michaelpineirocode/lithophane/blob/main/images/Screen%20Shot%202021-04-10%20at%201.23.26%20PM.png)  
 
 ```python3 main.py beach_hut.jpeg beach 2 0.12 100 50 1.2```  
 
