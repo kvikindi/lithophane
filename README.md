@@ -33,5 +33,13 @@ pip3 install . --no-binary :all: --no-use-pep517
 ```
 This code will clone numpy into the directory locally.
 
-## Demo
-1.)
+## Demo  
+### 1.) Ensure that "beach_hut.jpeg" is in the src/Pics/Input directory/
+![](https://github.com/michaelpineirocode/lithophane/blob/main/images/Screen%20Shot%202021-04-10%20at%201.11.23%20PM.png)
+
+### 2.) Within the src directory, execute the command following the arguments above.  
+Photo goes here.  
+
+```python3 main.py beach_hut.jpeg beach 2 0.12 100 50 1.2```  
+
+I find that a thickness of 3-4 mm is ideal. I am running an Ender 3 Pro, so a layer thickness 0.12 mm is going to be the finest layer height that I can afford. The maximum size that I am comfortable with this lithophane being is 100 mm x 50 mm, so I am going to put those for max_x and max_y.
