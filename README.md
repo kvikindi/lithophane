@@ -50,3 +50,9 @@ I find that a thickness of 3-4 mm is ideal. I am running an Ender 3 Pro, so a la
 The resolution may need to be adjusted. In that case, go ahead and hit "y" for yes and it will automatically adjust. If the proportions are _far_ off, then it is possible that the program will fail. For example, obviously it can't create a mesh that is 1 mm x 500 mm, it just won't work.  
   
 The program may take a while to run depending on how beefy your machine is. It will output the time in seconds that it took to complete when it is done. Now there should be a photo in the "src/Pics/Output" directory, as well as an stl in the "src/STLS" directory.
+
+If you'd like, you can click on the output photo to see the grayscale image and see if the details are displaying properly.
+![](https://github.com/michaelpineirocode/lithophane/blob/main/images/Screen%20Shot%202021-04-10%20at%201.24.14%20PM.png)
+
+### 4.) Import the STL file into Cura (or a slicer of your choosing)
+
