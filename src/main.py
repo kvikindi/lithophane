@@ -46,34 +46,32 @@ def lower_resolution(x, y, pix):
     y_resolution = int(max_y / layer_height)
     adjustment_x = math.ceil(x - x_resolution) # the number of x that I need to remove
     adjustment_y = math.ceil(y - y_resolution) # the number of y that I need to remove
-    intervals_x = x #initializing intervals as 1
-    intervals_y = y
 
-    if (adjustment_x) > 0:
-        intervals_x = math.floor(x / adjustment_x) #defining how often to SKIP a pixel
 
+    if (adjustment_x) > 0: # tests if the amount that needs to be adjusted is greater than 0
+        intervals_x = int(x / adjustment_x) #defining how often to SKIP a pixel
     if (adjustment_y) > 0:
-        intervals_y = math.floor(y / adjustment_y)
-    
+        intervals_y = int(y / adjustment_y)
+
     img = Image.new("RGB", (x_resolution, y_resolution), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
     adj_pix = img.load()
 
     x_offset, y_offset = 0, 0
 
-    try:
-        for i in range(y_resolution):
-            x_offset = 0 #resets the offset every time that we change y's
-            if (i % intervals_y == 0): #skips a y ONCE for every time we loop through
-                    y_offset += 1
-            for j in range(x_resolution):
-                pixel = pix[j + x_offset, i + y_offset]
-                adj_pix[j, i] = pixel
+    for i in range(y_resolution): # loops through every row
+        x_offset = 0 #resets the offset every time that we change y's
+        if (i % intervals_y == 0): # adjusts offset for y ONCE for every time we hit an interval
+                y_offset += 1
+        for j in range(x_resolution):
+            if (j % intervals_x == 0):
+                x_offset += 1
+            
+            pixel = pix[j + x_offset, i + y_offset]
+            adj_pix[j, i] = pixel
 
-                if (j % intervals_x == 0):
-                    pass
-                    x_offset += 1
-    except IndexError:
-        print ("Photo dimensions too far disproportionate from max_x or max_y.")
+    #except IndexError:
+        #print ("Photo dimensions too far disproportionate from max_x or max_y.")
+        #exit()
         
     return img
 
@@ -167,7 +165,7 @@ def main():
     x = img.size[0]
     y = img.size[1]
     pix = img.load()
-
+    print(x, y)
     #adjust resolution if needed
     if test_fit(x, y) == False:
         img = lower_resolution(x, y, pix)
