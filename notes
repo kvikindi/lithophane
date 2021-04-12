@@ -1,0 +1,6 @@
+08 April 2021
+- Added an exception for an index error caused by disproportionate dimensions.
+- Created a way to organize photos into input/output
+- Fixed an indexing issue with the vertice finder
+- Fixed the way a heightmap is generated so it is not inverted anymore
+- updated the length of the array to accomodate the extra vertices created for the sides and bottom
