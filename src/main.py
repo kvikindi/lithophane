@@ -121,6 +121,7 @@ def find_surfaces(heightmap):
             # this is for creating the sides ALONG the y-axis
             row_size = len(heightmap[y]) - 1
             
+            #this NEEDS to be cleaned uo
             surfaces["vectors"][vert_index] = np.array([[0, y, heightmap[y][0]], [0, y, 0], [0, y+1, heightmap[y][0]]]) # sides closest to 0 index
             vert_index += 1
             surfaces["vectors"][vert_index] = np.array([[0, y+1, heightmap[y][0]], [0, y, 0], [0, y+1, 0]])
