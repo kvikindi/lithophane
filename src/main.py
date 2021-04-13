@@ -46,34 +46,32 @@ def lower_resolution(x, y, pix):
     y_resolution = int(max_y / layer_height)
     adjustment_x = math.ceil(x - x_resolution) # the number of x that I need to remove
     adjustment_y = math.ceil(y - y_resolution) # the number of y that I need to remove
-    intervals_x = x #initializing intervals as 1
-    intervals_y = y
 
-    if (adjustment_x) > 0:
-        intervals_x = math.floor(x / adjustment_x) #defining how often to SKIP a pixel
 
+    if (adjustment_x) > 0: # tests if the amount that needs to be adjusted is greater than 0
+        intervals_x = int(x / adjustment_x) #defining how often to SKIP a pixel
     if (adjustment_y) > 0:
-        intervals_y = math.floor(y / adjustment_y)
-    
+        intervals_y = int(y / adjustment_y)
+
     img = Image.new("RGB", (x_resolution, y_resolution), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
     adj_pix = img.load()
 
     x_offset, y_offset = 0, 0
 
-    try:
-        for i in range(y_resolution):
-            x_offset = 0 #resets the offset every time that we change y's
-            if (i % intervals_y == 0): #skips a y ONCE for every time we loop through
-                    y_offset += 1
-            for j in range(x_resolution):
-                pixel = pix[j + x_offset, i + y_offset]
-                adj_pix[j, i] = pixel
+    for i in range(y_resolution): # loops through every row
+        x_offset = 0 #resets the offset every time that we change y's
+        if (i % intervals_y == 0): # adjusts offset for y ONCE for every time we hit an interval
+                y_offset += 1
+        for j in range(x_resolution):
+            if (j % intervals_x == 0):
+                x_offset += 1
+            
+            pixel = pix[j + x_offset, i + y_offset]
+            adj_pix[j, i] = pixel
 
-                if (j % intervals_x == 0):
-                    pass
-                    x_offset += 1
-    except IndexError:
-        print ("Photo dimensions too far disproportionate from max_x or max_y.")
+    #except IndexError:
+        #print ("Photo dimensions too far disproportionate from max_x or max_y.")
+        #exit()
         
     return img
 
@@ -105,6 +103,11 @@ def save_data(data, filename):
         file_.write(str(data[i]) + "\n")
     file_.close()
 
+def change_vectors(surfaces, vert_index, array_content):
+    surfaces["vectors"][vert_index] = np.array(array_content)
+    vert_index += 1
+    return surfaces, vert_index
+
 def find_surfaces(heightmap):
     number_of_vertices = (((len(heightmap[0]) - 1) * (len(heightmap) - 1)) * 2) + (((len(heightmap[0]) - 1) * 4) + ((len(heightmap) - 1) * 5)) + 2 # the number of vertices is 2(x-1 * y-1) + 4(x-1 + y-1) + 2
     surfaces = np.zeros(number_of_vertices, dtype=mesh.Mesh.dtype) # need to add 10 because of the sides and bottom
@@ -114,40 +117,28 @@ def find_surfaces(heightmap):
         if y != len(heightmap) - 1: #do not need to complete in the last row
             for x in range(len(heightmap[y])):
                 if x != len(heightmap[y]) - 1: # do not need last column
-                    surfaces["vectors"][vert_index] = np.array([[x, y, heightmap[y][x]], [x, y+1, heightmap[y+1][x]], [x+1, y, heightmap[y][x+1]]]) #creates "first" triangle
-                    vert_index += 1
-                    surfaces["vectors"][vert_index] = np.array(([[x, y+1, heightmap[y+1][x]], [x+1, y+1, heightmap[y+1][x+1]], [x+1, y, heightmap[y][x+1]]]))
-                    vert_index += 1
+                    surfaces, vert_index = change_vectors(surfaces, vert_index, [[x, y, heightmap[y][x]], [x, y+1, heightmap[y+1][x]], [x+1, y, heightmap[y][x+1]]]) #creates "first" triangle
+                    surfaces, vert_index = change_vectors(surfaces, vert_index, ([[x, y+1, heightmap[y+1][x]], [x+1, y+1, heightmap[y+1][x+1]], [x+1, y, heightmap[y][x+1]]]))
     
     for y in range(len(heightmap)): # for creating the bottom section
             # this is for creating the sides ALONG the y-axis
             row_size = len(heightmap[y]) - 1
-            
-            surfaces["vectors"][vert_index] = np.array([[0, y, heightmap[y][0]], [0, y, 0], [0, y+1, heightmap[y][0]]]) # sides closest to 0 index
-            vert_index += 1
-            surfaces["vectors"][vert_index] = np.array([[0, y+1, heightmap[y][0]], [0, y, 0], [0, y+1, 0]])
-            vert_index += 1
-            surfaces["vectors"][vert_index] = np.array([[row_size, y, heightmap[y][row_size]], [row_size, y, 0], [row_size, y+1, heightmap[y][0]]]) # sides furthest from 0 index
-            vert_index += 1
-            surfaces["vectors"][vert_index] = np.array([[row_size, y+1, heightmap[y][row_size]], [row_size, y, 0], [row_size, y+1, 0]])
-            vert_index += 1
+            surfaces, vert_index = change_vectors(surfaces, vert_index, [[0, y, heightmap[y][0]], [0, y, 0], [0, y+1, heightmap[y][0]]]) # sides closest to 0 index
+            surfaces, vert_index = change_vectors(surfaces, vert_index, [[0, y+1, heightmap[y][0]], [0, y, 0], [0, y+1, 0]])
+            surfaces, vert_index = change_vectors(surfaces, vert_index, [[row_size, y, heightmap[y][row_size]], [row_size, y, 0], [row_size, y+1, heightmap[y][0]]]) # sides furthest from 0 index
+            surfaces, vert_index = change_vectors(surfaces, vert_index, [[row_size, y+1, heightmap[y][row_size]], [row_size, y, 0], [row_size, y+1, 0]])
 
     for x in range(len(heightmap[0])): # this creates the sides ALONG the x-axis
             column_size = len(heightmap) - 1
 
-            surfaces["vectors"][vert_index] = np.array([[x, 0, heightmap[0][x]], [x, 0, 0], [x+1, 0, heightmap[0][x]]]) # sides closest to 0 index
-            vert_index += 1
-            surfaces["vectors"][vert_index] = np.array([[x+1, 0, heightmap[0][x]], [x, 0, 0], [x+1, 0, 0]])
-            vert_index += 1
-            surfaces["vectors"][vert_index] = np.array([[x, column_size, heightmap[column_size][x]], [x, column_size, 0], [x+1, column_size, heightmap[0][x]]]) # sides furthest from 0 index
-            vert_index += 1
-            surfaces["vectors"][vert_index] = np.array([[x+1, column_size, heightmap[column_size][x]], [x, column_size, 0], [x+1, column_size, 0]])
-            vert_index += 1
+            surfaces, vert_index = change_vectors(surfaces, vert_index, [[x, 0, heightmap[0][x]], [x, 0, 0], [x+1, 0, heightmap[0][x]]]) # sides closest to 0 index
+            surfaces, vert_index = change_vectors(surfaces, vert_index, [[x+1, 0, heightmap[0][x]], [x, 0, 0], [x+1, 0, 0]])
+            surfaces, vert_index = change_vectors(surfaces, vert_index, [[x, column_size, heightmap[column_size][x]], [x, column_size, 0], [x+1, column_size, heightmap[0][x]]]) # sides furthest from 0 index
+            surfaces, vert_index = change_vectors(surfaces, vert_index, [[x+1, column_size, heightmap[column_size][x]], [x, column_size, 0], [x+1, column_size, 0]])
     
     # add last two vertices on the bottom!
-    surfaces["vectors"][vert_index] = np.array([[0, 0, 0], [row_size, 0, 0], [0, column_size, 0]])
-    vert_index += 1
-    surfaces["vectors"][vert_index] = np.array([[row_size, column_size, 0], [row_size, 0, 0], [0, column_size, 0]])
+    surfaces, vert_index = change_vectors(surfaces, vert_index, [[0, 0, 0], [row_size, 0, 0], [0, column_size, 0]])
+    surfaces, vert_index = change_vectors(surfaces, vert_index, [[row_size, column_size, 0], [row_size, 0, 0], [0, column_size, 0]])
 
     return surfaces
 
@@ -167,7 +158,7 @@ def main():
     x = img.size[0]
     y = img.size[1]
     pix = img.load()
-
+    print(x, y)
     #adjust resolution if needed
     if test_fit(x, y) == False:
         img = lower_resolution(x, y, pix)
