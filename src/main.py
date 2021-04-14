@@ -4,6 +4,7 @@ import math
 import numpy as np
 from stl import mesh, stl
 import time
+from fractions import Fraction
 
 def mean(pixel):
     sum__ = pixel[0] + pixel[1] + pixel[2]
@@ -47,24 +48,31 @@ def lower_resolution(x, y, pix):
     adjustment_x = math.ceil(x - x_resolution) # the number of x that I need to remove
     adjustment_y = math.ceil(y - y_resolution) # the number of y that I need to remove
 
+    offset_distance_x, offset_distance_y = 40, 40 # the distance that will be offset
 
     if (adjustment_x) > 0: # tests if the amount that needs to be adjusted is greater than 0
-        intervals_x = int(x / adjustment_x) #defining how often to SKIP a pixel
+        intervals_x = int((x / adjustment_x) * 10) #defining how often to SKIP a pixel
+
+        print(intervals_x)
+        
     if (adjustment_y) > 0:
-        intervals_y = int(y / adjustment_y)
+        intervals_y = int((y / adjustment_y) * 10)
+
+
 
     img = Image.new("RGB", (x_resolution, y_resolution), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
     adj_pix = img.load()
 
     x_offset, y_offset = 0, 0
 
+
     for i in range(y_resolution): # loops through every row
         x_offset = 0 #resets the offset every time that we change y's
         if (i % intervals_y == 0): # adjusts offset for y ONCE for every time we hit an interval
-                y_offset += 1
+                y_offset += offset_distance_y
         for j in range(x_resolution):
             if (j % intervals_x == 0):
-                x_offset += 1
+                x_offset += offset_distance_x
             
             pixel = pix[j + x_offset, i + y_offset]
             adj_pix[j, i] = pixel
