@@ -39,47 +39,44 @@ def find_heights(pix, x, y):
                 heightmap[j][i] = 1
     return heightmap
 
-def lower_resolution(x, y, pix):
-    layer_height = float(sys.argv[4])
+def find_average(pix, x, y):
+    sum_ = 0
+    total = 0
+    for i in range(y):
+        for j in range(x):
+            sum_ += pix[j, i][0]
+            total += 1
+
+    average = int(sum_ / total)
+    return average
+
+def lower_resolution(x, y, pix, average):
+    layer_height = float(sys.argv[4]) # the layer height of the printer
     max_x = int(sys.argv[5]) # the physical size in mm
-    max_y = int(sys.argv[6]) 
+    max_y = int(sys.argv[6])
     x_resolution = int((max_x / layer_height)) # the number of pixels that can physically fit given the layer thickness
     y_resolution = int(max_y / layer_height)
-    adjustment_x = math.ceil(x - x_resolution) # the number of x that I need to remove
-    adjustment_y = math.ceil(y - y_resolution) # the number of y that I need to remove
-
-    offset_distance_x, offset_distance_y = 40, 40 # the distance that will be offset
-
-    if (adjustment_x) > 0: # tests if the amount that needs to be adjusted is greater than 0
-        intervals_x = int((x / adjustment_x) * 10) #defining how often to SKIP a pixel
-
-        print(intervals_x)
-        
-    if (adjustment_y) > 0:
-        intervals_y = int((y / adjustment_y) * 10)
-
-
+    adjustment_x = math.ceil(x - x_resolution) # the factor of x that needs to be shrunken to
+    adjustment_y = math.ceil(y - y_resolution) # the factor of y that needs to be shrunken to
 
     img = Image.new("RGB", (x_resolution, y_resolution), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
     adj_pix = img.load()
 
     x_offset, y_offset = 0, 0
 
+    intervals_x = int(x / adjustment_x)
+    intervals_y = int(y / adjustment_y)
 
     for i in range(y_resolution): # loops through every row
         x_offset = 0 #resets the offset every time that we change y's
         if (i % intervals_y == 0): # adjusts offset for y ONCE for every time we hit an interval
-                y_offset += offset_distance_y
+                y_offset += 1
         for j in range(x_resolution):
             if (j % intervals_x == 0):
-                x_offset += offset_distance_x
+                x_offset += 1
             
             pixel = pix[j + x_offset, i + y_offset]
             adj_pix[j, i] = pixel
-
-    #except IndexError:
-        #print ("Photo dimensions too far disproportionate from max_x or max_y.")
-        #exit()
         
     return img
 
@@ -101,9 +98,6 @@ def test_fit(x, y):
             raise Exception("Picture cannot fit into the maximum y length provided. Please increase the y or reduce the resolution of the image")
     else:
         return True
-
-    if test_fit(x, y) == False:
-        pass
 
 def save_data(data, filename):
     file_ = open("Data/" + filename, "w")
@@ -167,15 +161,19 @@ def main():
     y = img.size[1]
     pix = img.load()
     print(x, y)
+    
+    # convert to grayscale
+    pix = convert_to_grayscale(pix, x, y)
+    
+    average = find_average(pix, x, y)
+
     #adjust resolution if needed
     if test_fit(x, y) == False:
-        img = lower_resolution(x, y, pix)
+        img = lower_resolution(x, y, pix, average)
         x = img.size[0]
         y = img.size[1]
         pix = img.load()
 
-    # convert to grayscale
-    pix = convert_to_grayscale(pix, x, y)
     save_image(img)
     
     # calculate "heightmap" (or whatever this data structure is) based on grayscale intensities
