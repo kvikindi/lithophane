@@ -39,40 +39,32 @@ def find_heights(pix, x, y):
                 heightmap[j][i] = 1
     return heightmap
 
-def find_average(pix, x, y):
-    sum_ = 0
-    total = 0
-    for i in range(y):
-        for j in range(x):
-            sum_ += pix[j, i][0]
-            total += 1
-
-    average = int(sum_ / total)
-    return average
-
-def lower_resolution(x, y, pix, average):
+def lower_resolution(x, y, pix):
+    '''
+        First thing is first, I need to work out  a lot of different variables that will be useful
+    '''
+    
     layer_height = float(sys.argv[4]) # the layer height of the printer
     max_x = int(sys.argv[5]) # the physical size in mm
     max_y = int(sys.argv[6])
-    x_resolution = int((max_x / layer_height)) # the number of pixels that can physically fit given the layer thickness
-    y_resolution = int(max_y / layer_height)
-    adjustment_x = math.ceil(x - x_resolution) # the factor of x that needs to be shrunken to
-    adjustment_y = math.ceil(y - y_resolution) # the factor of y that needs to be shrunken to
-
-    img = Image.new("RGB", (x_resolution, y_resolution), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
-    adj_pix = img.load()
-
+    x_resolution = math.ceil(max_x / layer_height)
+    y_resolution = math.ceil(max_y / layer_height)
+    x_factor = math.ceil(x / max_x)
+    y_factor = math.ceil(y / max_y)
     x_offset, y_offset = 0, 0
 
-    intervals_x = int(x / adjustment_x)
-    intervals_y = int(y / adjustment_y)
+    ''' Load new image '''
+    img = Image.new("RGB", (x_resolution + 1, y_resolution + 1), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
+    adj_pix = img.load()
+
+
 
     for i in range(y_resolution): # loops through every row
         x_offset = 0 #resets the offset every time that we change y's
-        if (i % intervals_y == 0): # adjusts offset for y ONCE for every time we hit an interval
+        if (i % y_factor != 0): # adjusts offset for y ONCE for every time we hit an interval
                 y_offset += 1
         for j in range(x_resolution):
-            if (j % intervals_x == 0):
+            if (j % x_factor != 0):
                 x_offset += 1
             
             pixel = pix[j + x_offset, i + y_offset]
@@ -164,12 +156,10 @@ def main():
     
     # convert to grayscale
     pix = convert_to_grayscale(pix, x, y)
-    
-    average = find_average(pix, x, y)
 
     #adjust resolution if needed
     if test_fit(x, y) == False:
-        img = lower_resolution(x, y, pix, average)
+        img = lower_resolution(x, y, pix)
         x = img.size[0]
         y = img.size[1]
         pix = img.load()
