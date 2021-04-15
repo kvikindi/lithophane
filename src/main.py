@@ -51,21 +51,25 @@ def lower_resolution(x, y, pix):
     y_resolution = math.ceil(max_y / layer_height)
     x_factor = math.ceil(x / max_x)
     y_factor = math.ceil(y / max_y)
+    
+    print("BRUH", x_factor, y_factor)
+
     x_offset, y_offset = 0, 0
+    x_interval_amount, y_interval_amount = 4, 2 # since the interval might change depending on the scale of the image
 
     ''' Load new image '''
     img = Image.new("RGB", (x_resolution + 1, y_resolution + 1), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
     adj_pix = img.load()
 
-
-
     for i in range(y_resolution): # loops through every row
-        x_offset = 0 #resets the offset every time that we change y's
+        x_offset = 0 # resets the offset every time that we change y's
         if (i % y_factor != 0): # adjusts offset for y ONCE for every time we hit an interval
-                y_offset += 1
+                if (y_resolution - y_offset) > y_interval_amount:
+                    y_offset += y_interval_amount
         for j in range(x_resolution):
             if (j % x_factor != 0):
-                x_offset += 1
+                if (x_resolution - x_offset) > x_interval_amount:
+                    x_offset += x_interval_amount
             
             pixel = pix[j + x_offset, i + y_offset]
             adj_pix[j, i] = pixel
