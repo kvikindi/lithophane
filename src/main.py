@@ -19,7 +19,7 @@ def convert_to_grayscale(pix, x, y):
     return pix
 
 def save_image(img):
-    img.save("Pics/Outputs/" + sys.argv[2] + ".png") #saves image
+    img.save("Pics/Output/" + sys.argv[2] + ".png") #saves image
 
 def find_heights(pix, x, y):
     thickness = float(sys.argv[3])
@@ -149,7 +149,7 @@ def main():
     start = time.time()
 
     # instantiating the image
-    img = Image.open("Pics/Inputs/" + sys.argv[1])
+    img = Image.open("Pics/Input/" + sys.argv[1])
 
     # assigning important variables for image processing
     x = img.size[0]
