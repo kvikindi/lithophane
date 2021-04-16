@@ -75,7 +75,7 @@ Finally, you can disable uniform scaling and adjust the z axis to what was enter
 Next is ensuring that the proper settings are enabled. Make sure the proper layer thickness is set, 100% infill is set, and retraction with z-hop.
 
 ![](https://github.com/michaelpineirocode/lithophane/blob/main/images/Screen%20Shot%202021-04-10%20at%2010.23.27%20PM.png)
-You can tab over to "preview" to get a better look at the model before printing, without all of the highlighted colors.
+You can tab over to "preview" to get a better look at the model before printing, without all of the highlighted colors. Sometimes with _really_ big photos, the preview feature can crash Cura, although it will still slice and save properly, so if it crashes just don't preview it.
 
 If you need to make adjustments, as long as the STL has the same output name, then if you run the command line again, a prompt will appear in Cura asking if you want to reload the file. This will save the transformations and translations, so it doesn't need to be resized or moved every single time.
 
