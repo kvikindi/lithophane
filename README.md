@@ -68,7 +68,7 @@ You can move the file to the center by editing the transform to 0, and then resc
 
 The STL should become highlighted red and yellow at this point.
 
-![]https://github.com/michaelpineirocode/lithophane/blob/main/images/Screen%20Shot%202021-04-10%20at%2010.22.22%20PM.png
+![](https://github.com/michaelpineirocode/lithophane/blob/main/images/Screen%20Shot%202021-04-10%20at%2010.22.22%20PM.png)
 Finally, you can disable uniform scaling and adjust the z axis to what was entered for the thickness in the program. From a side view, if the peaks and valleys seem far too high or low, then this may mean adjusting the "normalizing value" in the command line and reloading the mesh.
 
 ![](https://github.com/michaelpineirocode/lithophane/blob/main/images/Screen%20Shot%202021-04-10%20at%2010.22.53%20PM.png)
