@@ -51,29 +51,28 @@ def lower_resolution(x, y, pix):
     y_resolution = math.ceil(max_y / layer_height)
     x_factor = math.ceil(x / max_x)
     y_factor = math.ceil(y / max_y)
+
+    rows_tokeep = []
+    cols_tokeep = []
     
-    print("BRUH", x_factor, y_factor)
-
-    x_offset, y_offset = 0, 0
-    x_interval_amount, y_interval_amount = 4, 2 # since the interval might change depending on the scale of the image
-
-    ''' Load new image '''
-    img = Image.new("RGB", (x_resolution + 1, y_resolution + 1), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
+    for i in range(y): # loops through every row
+        if (i % y_factor == 0): # adjusts offset for y ONCE for every time we hit an interval
+            rows_tokeep.append(i)
+    for j in range(x):
+        if (j % x_factor == 0):
+            cols_tokeep.append(j)
+       
+        ''' Load new image '''
+    img = Image.new("RGB", (len(cols_tokeep), len(rows_tokeep)), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
     adj_pix = img.load()
+    print("TEST", len(cols_tokeep), len(rows_tokeep))
 
-    for i in range(y_resolution): # loops through every row
-        x_offset = 0 # resets the offset every time that we change y's
-        if (i % y_factor != 0): # adjusts offset for y ONCE for every time we hit an interval
-                if (y_resolution - y_offset) > y_interval_amount:
-                    y_offset += y_interval_amount
-        for j in range(x_resolution):
-            if (j % x_factor != 0):
-                if (x_resolution - x_offset) > x_interval_amount:
-                    x_offset += x_interval_amount
-            
-            pixel = pix[j + x_offset, i + y_offset]
+    for i in range(len(rows_tokeep) - 1):
+        for j in range(len(cols_tokeep) - 1):
+            # print(i, j)
+            pixel = pix[j, i]
             adj_pix[j, i] = pixel
-        
+    
     return img
 
 def test_fit(x, y):
