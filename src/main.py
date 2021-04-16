@@ -49,8 +49,8 @@ def lower_resolution(x, y, pix):
     max_y = int(sys.argv[6])
     x_resolution = math.ceil(max_x / layer_height)
     y_resolution = math.ceil(max_y / layer_height)
-    x_factor = math.ceil(x / max_x)
-    y_factor = math.ceil(y / max_y)
+    x_factor = math.ceil(x / x_resolution)
+    y_factor = math.ceil(y / y_resolution)
 
     rows_tokeep = []
     cols_tokeep = []
@@ -61,16 +61,15 @@ def lower_resolution(x, y, pix):
     for j in range(x):
         if (j % x_factor == 0):
             cols_tokeep.append(j)
-       
-        ''' Load new image '''
+    
     img = Image.new("RGB", (len(cols_tokeep), len(rows_tokeep)), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
     adj_pix = img.load()
-    print("TEST", len(cols_tokeep), len(rows_tokeep))
+    print(rows_tokeep)
 
     for i in range(len(rows_tokeep) - 1):
         for j in range(len(cols_tokeep) - 1):
             # print(i, j)
-            pixel = pix[j, i]
+            pixel = pix[cols_tokeep[j], rows_tokeep[i]]
             adj_pix[j, i] = pixel
     
     return img
