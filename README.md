@@ -1,6 +1,6 @@
 ![](https://github.com/michaelpineirocode/lithophane/blob/main/images/blog_eye_flashes_1932x862.jpg)
 
-# lithophane
+# Lithophane
 Free to use, open source lithophane maker built using python. The end goal is to be able to convert any image to a lithophane of a specified size.
 
 ## How to use
@@ -8,13 +8,13 @@ Free to use, open source lithophane maker built using python. The end goal is to
 As of now, the program must be run with a few command line arguments.  
 ``` py main.py -inputfile -outputfile -thickness(mm) -layerheight(mm) -max_x(mm) -max_y(mm) -normalizing_multiplier(float)```
 
-The max_x and max_y variables represent the largest x and y value that should be considered for printing, and will typically be the size that the stl is outputed as. The program might give an option to automatically adjust the resolution, but the image still cuts a _little_ off of the bottom and right due to rounding in the program. In the future, I will fix these issues. If the max_x or max_y are far too disproportionate or far too small, it may cut off the sides. I'm not entirely sure why, but it affects some photos more than others.  
+The max_x and max_y variables represent the largest x and y value that should be considered for printing, and will typically be the size that the STL is optimized for. The program has an option to automatically adjust resolution. Before loading the STL, check the "/src/Pics/Outputs" folder for your image. If the image is too low of resolution, then you will need to crop it manually or increase the max_x and max_y 
 
-The normalizing factor is for adjusting the x if the peaks and valleys are far too large.  
+The normalizing factor is for adjusting the x if the peaks and valleys are far too large. I typically use a value of 1.2, although this is not neccessary. I recommend playing around with it.
 
-When the 3D model is made, it will be scaled far too large. In the slicer, you need to scale it down to the dimensions you entered for optimal results. In the future I may automatically adjust this, but for now it is easy enough to adjust in the slicer. The reason for a max_x and max_y is for optimal resolution. For the size.  
+When the 3D model is made, it will be scaled far too large. In the slicer, you need to scale it down to the dimensions you entered for optimal results. In the future I may automatically adjust this, but for now it is easy enough to adjust in the slicer. The reason for a max_x and max_y is for optimal resolution for the size that can fit on the printer.  
 
-The recommended size for a lithograph is 100 on the x and a close approximate to the right proportion on the max_y variable for a landscape orientated photo. You can view this result in the "Pics/Output" folder to see if the photo came out properly.   
+The recommended size for a lithograph is close to 100 on either axis and a close approximate to the same proportion on the other. You can view this result in the "src/Pics/Output" folder to see if the photo came out properly.   
 
 ## Dependencies  
 Python 3.9 or higher: www.python.org  
@@ -22,6 +22,10 @@ Ultimaker Cura or another slicer of your choosing.
 numpy: ```pip3 install numpy```  
 numpy-stl: ```pip3 install numpy-stl```  
 Pillow: ```pip3 install pillow```  
+
+Or you can open the terminal in the main directory "/lithophane" and run:  
+```pip3 install -r requirements.txt```  
+This will automatically install all of the dependencies (except for Python), which are listed in the requirements.txt file. If it does not work, then I would go through each dependency and troubleshoot which one does not work.
 
 There is a possibility that numpy won't install properly on a Mac, I believe that this could be due to the M1 chip. This is what worked for me when I installed it in my project directory (src), and then installing numpy-stl also worked: 
 ```pip3 install Cython. 
