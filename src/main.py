@@ -4,7 +4,7 @@ import math
 import numpy as np
 from stl import mesh, stl
 import time
-from fractions import Fraction
+import settings
 
 def mean(pixel):
     sum__ = pixel[0] + pixel[1] + pixel[2]
@@ -78,12 +78,15 @@ def test_fit(x, y):
     max_y = int(sys.argv[6])
 
     if (max_x / layer_height) < x:
-
+        if settings.automatically_resize_image: # if the user wants to automatically resize the image, immediately return false
+            return False
         if input("Picture cannot fit within the space determined. Would you like to automatically adjust the resolution? (y/n)") == "y":
             return False
         else:
             raise Exception("Picture cannot fit into the maximum x length provided. Please increase the x or reduce the resolution of the image.")
     if (max_y / layer_height) < y:
+        if settings.automatically_resize_image:
+            return False
         if input("Picture cannot fit within the space determined. Would you like to automatically adjust the resolution? (y/n)") == "y":
             return False
         else:
@@ -152,7 +155,8 @@ def main():
     x = img.size[0]
     y = img.size[1]
     pix = img.load()
-    print(x, y)
+    if settings.display_initial_dimensions:
+        print("Initial image size (x, y):", x, y)
     
     # convert to grayscale
     pix = convert_to_grayscale(pix, x, y)
@@ -170,7 +174,9 @@ def main():
     
     # calculate "heightmap" (or whatever this data structure is) based on grayscale intensities
     heightmap = find_heights(pix, x, y)
-    save_data(heightmap, sys.argv[2])
+    if settings.save_heightmap_data: # tests if the data should be automatically saved
+        save_data(heightmap, sys.argv[2])
+    
     #find surfaces
     surfaces = find_surfaces(heightmap)
     
@@ -178,7 +184,11 @@ def main():
     create_mesh(surfaces)
 
     ellapsed = time.time() - start - pause_time
-    print(ellapsed)
+    if settings.display_computational_time:
+        print("Total computational time:", round(ellapsed, 2), "seconds")
+
+    if settings.display_end_prompt:
+        print("Done.")
 
 if __name__ == "__main__":
     main()
