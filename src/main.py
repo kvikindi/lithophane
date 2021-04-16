@@ -46,14 +46,14 @@ def lower_resolution(x, y, pix):
     
     layer_height = float(sys.argv[4]) # the layer height of the printer
     max_x = int(sys.argv[5]) # the physical size in mm
-    max_y = int(sys.argv[6])
-    x_resolution = math.ceil(max_x / layer_height)
+    max_y = int(sys.argv[6]) # the physical size
+    x_resolution = math.ceil(max_x / layer_height) # the most amount of layers I can fit in that size
     y_resolution = math.ceil(max_y / layer_height)
-    x_factor = math.ceil(x / x_resolution)
+    x_factor = math.ceil(x / x_resolution) # factor how far off the amount I can fit is from the true res
     y_factor = math.ceil(y / y_resolution)
 
-    rows_tokeep = []
-    cols_tokeep = []
+    rows_tokeep = [] # instantiating some arrays ahead of time. 
+    cols_tokeep = [] # I am not fitting THAT into a list comprehension line
     
     for i in range(y): # loops through every row
         if (i % y_factor == 0): # adjusts offset for y ONCE for every time we hit an interval
@@ -64,11 +64,9 @@ def lower_resolution(x, y, pix):
     
     img = Image.new("RGB", (len(cols_tokeep), len(rows_tokeep)), (0, 0, 0)) # creates a new blank image of new size that will be used to modify
     adj_pix = img.load()
-    print(rows_tokeep)
 
     for i in range(len(rows_tokeep) - 1):
         for j in range(len(cols_tokeep) - 1):
-            # print(i, j)
             pixel = pix[cols_tokeep[j], rows_tokeep[i]]
             adj_pix[j, i] = pixel
     
@@ -159,6 +157,7 @@ def main():
     # convert to grayscale
     pix = convert_to_grayscale(pix, x, y)
 
+    pause_time = time.time() # since there is an input in this function, the time may be messed up
     #adjust resolution if needed
     if test_fit(x, y) == False:
         img = lower_resolution(x, y, pix)
@@ -167,6 +166,7 @@ def main():
         pix = img.load()
 
     save_image(img)
+    pause_time = time.time() - pause_time
     
     # calculate "heightmap" (or whatever this data structure is) based on grayscale intensities
     heightmap = find_heights(pix, x, y)
@@ -177,7 +177,7 @@ def main():
     #create a mesh
     create_mesh(surfaces)
 
-    ellapsed = time.time() - start
+    ellapsed = time.time() - start - pause_time
     print(ellapsed)
 
 if __name__ == "__main__":
